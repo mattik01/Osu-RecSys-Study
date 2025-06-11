@@ -119,7 +119,7 @@ for schema in schemas:
     # 4. Keep highest-pp entry per user-beatmap-mod combo
     scores_df = scores_df.sort_values('pp', ascending=False)
     group_cols = ['beatmap_id', 'user_id', 'mods_string']
-    keep_cols = ['score', 'pp', 'maxcombo', 'rank', 'date', 'playcount']
+    keep_cols = ['score', 'pp','accuracy', 'maxcombo', 'rank', 'date', 'playcount']
     scores_df = scores_df.drop_duplicates(group_cols, keep='first')[group_cols + keep_cols]
 
     print("Merging with beatmap metadata...")

@@ -39,7 +39,16 @@ SELECT
   s.rank,
   s.enabled_mods,
   s.date,
-  COALESCE(p.playcount, 0) AS playcount
+  COALESCE(p.playcount, 0) AS playcount,
+  CASE
+    WHEN (s.count50 + s.count100 + s.count300 + s.countmiss) = 0 THEN NULL
+    ELSE ROUND(
+      (
+        (50 * s.count50 + 100 * s.count100 + 300 * s.count300)
+        / (300.0 * (s.count50 + s.count100 + s.count300 + s.countmiss))
+      ) * 100, 4
+    )
+  END AS accuracy
 FROM osu_scores_high s
 LEFT JOIN (
   SELECT user_id, beatmap_id, MAX(playcount) AS playcount
@@ -67,6 +76,9 @@ SELECT
     s.title,
     s.genre_id,
     s.language_id,
+    s.submit_date,
+    s.approved_date,
+    
     b.bpm,
     b.hit_length,
 
@@ -78,7 +90,7 @@ SELECT
     b.diff_size,
     b.diff_overall,
     b.diff_approach,
-    d.diff_unified as diff_star_rating,  -- Fixed typo in alias
+    d.diff_unified AS diff_star_rating,
     
     -- Pivoted difficulty attributes
     MAX(CASE WHEN a.attrib_id = 1 THEN a.value END) AS aim,
@@ -88,8 +100,8 @@ SELECT
     MAX(CASE WHEN a.attrib_id = 19 THEN a.value END) AS slider_factor,
     MAX(CASE WHEN a.attrib_id = 21 THEN a.value END) AS speed_note_count,
     MAX(CASE WHEN a.attrib_id = 23 THEN a.value END) AS speed_difficult_strain_count,
-    MAX(CASE WHEN a.attrib_id = 25 THEN a.value END) AS aim_difficult_strain_count  -- Removed trailing comma
-    
+    MAX(CASE WHEN a.attrib_id = 25 THEN a.value END) AS aim_difficult_strain_count
+
 FROM 
     osu_beatmap_difficulty d
 LEFT JOIN 
@@ -111,16 +123,16 @@ GROUP BY
     b.diff_drain, b.diff_size, b.diff_overall, b.diff_approach,
     b.difficultyrating, b.playcount, b.passcount, b.bpm,
     s.artist, s.title, s.tags, s.genre_id, s.language_id,
-    s.favourite_count, s.track_id;
+    s.favourite_count, s.track_id, s.submit_date, s.approved_date;
 
 
 
-
-################## Combined BEATMAP TABLECREATE TABLE combined_beatmaps AS
-SELECT*
+################## Combined BEATMAP TABLE
+CREATE TABLE `combined_beatmaps` AS
+SELECT *
 FROM `2025_05_01_performance_osu_random_10000`.`beatmaps`
 
 UNION
 
-SELECT*
+SELECT *
 FROM `2025_05_01_performance_osu_top_10000`.`beatmaps`;

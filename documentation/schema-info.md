@@ -57,6 +57,7 @@ Each row represents a unique combination of a **beatmap** and a **mod configurat
 | `set_favourite_count` | Number of users who favorited the beatmap set. |
 | `artist` | Artist of the song. |
 | `title` | Title of the song used |
+| `submit_date`, `approved_date` | When was the beatmap set published, and when was it approved for ranked |
 | `bpm` | Beats per minute of the song (tempo). |
 | `hit_length` | Duration of playable part (in seconds). |
 | `count_total`, `count_normal`, `count_slider`, `count_spinner` | Number of total objects and their breakdown. |
@@ -88,6 +89,7 @@ Each row represents the best score a user playing a specific beatmap with a spec
 | `user_id` | ID of the player. |
 | `score` | Total score earned (game-specific metric). |
 | `pp` | Performance points — a normalized skill score, used for player rankings|
+| `accuracy` | weighted ratio of hit accuracy and misses |
 | `maxcombo` | Maximum combo achieved in this play. (consequtive hits withouth missing an object) |
 | `rank` | Letter rank awarded (e.g., `A`, `S`, `X`). according to certain accuracy/combo requirements, but does not really matter |
 | `date` | Date the play occurred. |
@@ -113,3 +115,9 @@ Each row represents an **osu! player profile**.
 | `country_acronym` | Country code (e.g., `US`, `JP`). |
 | `last_played` | Timestamp of the most recent play. |
 | `total_seconds_played` | Total time spent playing (in seconds). |
+
+
+### Nice to have, if possible obtain these when i have the time and a way without the osu api banning me:
+- max pp of a beatmap_mod id
+- liked beatmap- sets of users
+- exist/failrate on beatmap
