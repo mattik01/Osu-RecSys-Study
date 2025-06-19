@@ -30,19 +30,12 @@ to make the huge amount of modding and beatmap combinations managable and avoid 
 - **Export Tables:**
   - Only includes beatmaps with complete `diff_` attributes for all relevant mod combinations.
   - `524,496 = 131,124 beatmaps × 4 mod combinations` (for Random).
-  - Top dataset export step was skipped or omitted.
 
 - **Processed Scores:**
   - Filtering applied based on:
     - Beatmap-mod relevant combinations.
     - diff attribute completeness.
-    - only scores on **relevant** items, see below
-  - 76% of Random and 74% of Top scores were retained.
 
-- **Processed Beatmaps:**
-  - Both datasets ended with 257,979 processed beatmaps.
-  - `random_relevant`: 60,498 beatmaps have ≥10 Random scores.
-  - `top_relevant`: 254,833 beatmaps have ≥10 Top scores.
 
 
 
@@ -50,11 +43,11 @@ to make the huge amount of modding and beatmap combinations managable and avoid 
 
 
 Each score is assigned an **enjoyment score** between 0 and 1 (most lie in the 0.1–0.5 range).  
-This factor is necessarily **heuristic**, designed from experience and checked to be *meaningful and balanced* through visualization and inspection of values (see `dataprocessor` and `analysis`).  
+This factor is necessarily somewhat arbitrary, as its computed from implicit feedback only. It was designed from experience and checked to be meaningful and reasonably balanced through visualization and inspection of values (see `dataprocessor` and `analysis`).  
 
-! At different points ALL components are normailzed to ranges between 0 and 1, usually on a per user basis, to keep them comparable. 
+!!! At different points ALL components are normailzed to ranges between 0 and 1, usually on a per user basis, to keep them comparable. 
 
-! At all relevant points, only data from the top/random dataset is seperated and used individually.
+!!! At all relevant points, only data from the top/random dataset is seperated and used individually.
 
 ```
 enjoyment = 
@@ -69,11 +62,11 @@ enjoyment =
 
 ---
 
-- **playcount_component(user, beatmap, mods)** =  `1 - exp(-user_playcount_on_beatmap / average_playcount)`  
-  → decaying scaling, normalized per-user to [0, 1]
+- **playcount_component(user, beatmap, mods)** =  `1 - exp(-user_playcount_on_beatmap / average_global_playcount)`  
+  → decaying scaling, saturation point around playcount average, normalized per-user to [0, 1]
 
 - **favourite_component(beatmapset)** =  `favourite_count / total_playcount`  
-  → global beatmapset explicit positive feedback percentage
+  → global explicit positive feedback percentage for beatmapset
 
 - **accuracy_component(score)** =  `1 - (accuracy - 0.95)^2`  
   → soft accuracy target of 95%
@@ -178,9 +171,9 @@ Each row represents an **osu! player profile**.
 total_weighted_pp,skill_stabilization_date
 
 ### Nice to have, if possible obtain these when i have the time and a way without the osu api banning me:
-- max pp of a beatmap_mod id
-- liked beatmap- sets of users
-- exist/failrate on beatmap
+- max pp of a beatmap_mod id (not in osu api, possibly in third party)
+- liked beatmap- sets of users (seems impossible)
+- exist/failrate on beatmap 
 
 
 
