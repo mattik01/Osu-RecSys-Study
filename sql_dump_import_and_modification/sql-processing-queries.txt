@@ -91,7 +91,7 @@ SELECT
     b.diff_overall,
     b.diff_approach,
     d.diff_unified AS diff_star_rating,
-    
+
     -- Pivoted difficulty attributes
     MAX(CASE WHEN a.attrib_id = 1 THEN a.value END) AS aim,
     MAX(CASE WHEN a.attrib_id = 3 THEN a.value END) AS speed,
@@ -105,17 +105,34 @@ SELECT
 FROM 
     osu_beatmap_difficulty d
 LEFT JOIN 
-    osu_beatmap_difficulty_attribs a ON d.beatmap_id = a.beatmap_id 
-                                     AND d.mode = a.mode 
-                                     AND d.mods = a.mods
+    osu_beatmap_difficulty_attribs a 
+      ON d.beatmap_id = a.beatmap_id 
+     AND d.mode = a.mode 
+     AND d.mods = a.mods
 LEFT JOIN
     osu_beatmaps b ON d.beatmap_id = b.beatmap_id
 LEFT JOIN
     osu_beatmapsets s ON b.beatmapset_id = s.beatmapset_id
 WHERE 
-    d.mode = 0 
-    AND d.mods IN (0, 16, 64, 80)  -- NM, HR, DT, DTHR
-    AND a.attrib_id IN (1, 3, 9, 11, 19, 21, 23, 25)
+    d.mode = 0
+    AND d.mods IN (0, 16, 64, 80)
+    AND d.beatmap_id IN (
+        -- only include beatmaps with all 4 mods and 8 attributes each
+        SELECT beatmap_id
+        FROM (
+            SELECT d.beatmap_id, d.mods, COUNT(DISTINCT a.attrib_id) AS attr_count
+            FROM osu_beatmap_difficulty d
+            JOIN osu_beatmap_difficulty_attribs a 
+              ON d.beatmap_id = a.beatmap_id 
+             AND d.mods = a.mods 
+             AND d.mode = a.mode
+            WHERE d.mode = 0 AND d.mods IN (0, 16, 64, 80)
+            GROUP BY d.beatmap_id, d.mods
+            HAVING COUNT(DISTINCT a.attrib_id) = 9
+        ) AS complete_mods
+        GROUP BY beatmap_id
+        HAVING COUNT(DISTINCT mods) = 4
+    )
 GROUP BY 
     d.beatmap_id, d.mods, d.diff_unified,
     b.beatmapset_id, b.user_id, b.total_length, b.hit_length,
@@ -125,14 +142,3 @@ GROUP BY
     s.artist, s.title, s.tags, s.genre_id, s.language_id,
     s.favourite_count, s.track_id, s.submit_date, s.approved_date;
 
-
-
-################## Combined BEATMAP TABLE
-CREATE TABLE `combined_beatmaps` AS
-SELECT *
-FROM `2025_05_01_performance_osu_random_10000`.`beatmaps`
-
-UNION
-
-SELECT *
-FROM `2025_05_01_performance_osu_top_10000`.`beatmaps`;
