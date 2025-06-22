@@ -52,9 +52,9 @@ This factor is necessarily somewhat arbitrary, as its computed from implicit fee
 ```
 enjoyment = 
 0.2 * playcount_component +
-0.4 * favourite_component +
+0.3 * favourite_component +
 0.2 * accuracy_component * (1 - farm_factor) +
-0.2 * pp_contribution_component * farm_factor
+0.3 * pp_contribution_component * farm_factor
 ```
 (if the map is farmy, value pp_contribution more; if not, value accuracy more)  
   
@@ -164,7 +164,7 @@ Each row represents an **osu! player profile**.
 | `country_acronym` | Country code (e.g., `US`, `JP`). |
 | `last_played` | Timestamp of the most recent play. |
 | `total_seconds_played` | Total time spent playing (in seconds). |
-| `total_weighted_pp` | Decaying weight pp sum on top 100 ranked scores, same formula as osu official: pp*95^(rank of play), this is the best metric for "user skill"|
+| `total_weighted_pp` | Decaying weight pp sum on top 100 ranked scores, same formula as osu official: pp*0.95^(rank of play), this is the best metric for "user skill"|
 | `skill_stabilization_date` | estimate of when users reached the current skill level, (date when they got 10 of their 15 best plays) |
 
 
