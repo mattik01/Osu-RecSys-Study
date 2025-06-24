@@ -52,7 +52,7 @@ def prepare_dataset(df):
 
 
 def evaluate(dataset, n_splits=5):
-    algo = SVD(n_factors=50, n_epochs=10, lr_all=0.005, reg_all=0.02)
+    algo = SVD(n_factors=50, n_epochs=20, lr_all=0.005, reg_all=0.05)
     print(f'Running {n_splits}-fold CV...')
     res = cross_validate(algo, dataset, measures=['RMSE', 'MAE'], cv=n_splits, verbose=True)
     print(f"RMSE={np.mean(res['test_rmse']):.4f}, MAE={np.mean(res['test_mae']):.4f}")
@@ -60,7 +60,7 @@ def evaluate(dataset, n_splits=5):
 
 def train_and_recommend(dataset, n_users=5, n_rec=5):
     trainset, _ = train_test_split(dataset, test_size=0.2, random_state=42)
-    algo = SVD(n_factors=50, n_epochs=10, lr_all=0.005, reg_all=0.02)
+    algo = SVD(n_factors=50, n_epochs=20, lr_all=0.005, reg_all=0.05)
     algo.fit(trainset)
     users = np.unique(trainset.all_users())[:n_users]
     for uid in users:
@@ -88,9 +88,9 @@ Running 5-fold CV...
 Evaluating RMSE, MAE of algorithm SVD on 5 split(s).
 
                   Fold 1  Fold 2  Fold 3  Fold 4  Fold 5  Mean    Std     
-RMSE (testset)    0.8155  0.8157  0.8148  0.8165  0.8171  0.8159  0.0008  
-MAE (testset)     0.6571  0.6573  0.6564  0.6578  0.6575  0.6572  0.0005  
-Fit time          41.48   44.05   44.46   45.68   44.05   43.94   1.37    
-Test time         17.99   16.57   18.28   16.77   16.52   17.23   0.75    
-RMSE=0.8159, MAE=0.6572
+RMSE (testset)    0.7905  0.7908  0.7906  0.7912  0.7911  0.7908  0.0003  
+MAE (testset)     0.6356  0.6361  0.6357  0.6364  0.6361  0.6360  0.0003  
+Fit time          79.23   81.19   81.28   81.16   80.98   80.77   0.77    
+Test time         17.98   16.80   18.25   16.78   16.70   17.30   0.67    
+RMSE=0.7908, MAE=0.6360
 """
