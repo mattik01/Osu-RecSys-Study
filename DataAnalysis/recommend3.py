@@ -46,8 +46,17 @@ def load_random_scores(chunksize=1_000_000):
 
 
 def prepare_dataset(df):
-    """Build Surprise Dataset from filtered df."""
-    reader = Reader(rating_scale=(df.enjoyment.min(), df.enjoyment.max()))
+    """Build Surprise Dataset with enjoyment scaled to [0,1]."""
+    # Raw enjoyment min/max
+    min_e, max_e = df['enjoyment'].min(), df['enjoyment'].max()
+    print(f"Raw enjoyment range: {min_e:.4f} to {max_e:.4f}")
+    # Min-max scale to [0, 1]
+    df['enjoyment'] = (df['enjoyment'] - min_e) / (max_e - min_e)
+    # Confirm new range
+    new_min, new_max = df['enjoyment'].min(), df['enjoyment'].max()
+    print(f"Scaled enjoyment range: {new_min:.4f} to {new_max:.4f}")
+    # Build Surprise dataset with fixed rating scale
+    reader = Reader(rating_scale=(0.0, 1.0))
     return Dataset.load_from_df(df[['user_id', 'mod_beatmap_id', 'enjoyment']], reader)
 
 
@@ -82,15 +91,21 @@ if __name__ == '__main__':
     train_and_recommend(data)
 
 """
-results after 20min execution:
 Loaded 6296570 post-stabilization scores
+Raw enjoyment range: -4.8750 to 10.3110
+Scaled enjoyment range: 0.0000 to 1.0000
 Running 5-fold CV...
 Evaluating RMSE, MAE of algorithm SVD on 5 split(s).
 
                   Fold 1  Fold 2  Fold 3  Fold 4  Fold 5  Mean    Std     
-RMSE (testset)    0.7905  0.7908  0.7906  0.7912  0.7911  0.7908  0.0003  
-MAE (testset)     0.6356  0.6361  0.6357  0.6364  0.6361  0.6360  0.0003  
-Fit time          79.23   81.19   81.28   81.16   80.98   80.77   0.77    
-Test time         17.98   16.80   18.25   16.78   16.70   17.30   0.67    
-RMSE=0.7908, MAE=0.6360
+RMSE (testset)    0.0532  0.0532  0.0533  0.0532  0.0532  0.0532  0.0000  
+MAE (testset)     0.0428  0.0428  0.0428  0.0428  0.0428  0.0428  0.0000  
+Fit time          79.42   81.33   81.07   81.61   81.36   80.96   0.79    
+Test time         18.13   16.63   18.08   17.06   16.66   17.31   0.66    
+RMSE=0.0532, MAE=0.0428
+User 1646427: [43186, 28077, 71560, 11883, 4431]
+User 3088364: [43186, 11883, 58282, 71560, 28077]
+User 13869127: [43186, 58282, 4431, 28077, 71560]
+User 7433533: [43186, 11883, 71560, 58282, 28077]
+User 13188716: [43186, 11883, 71560, 58282, 12633]
 """
