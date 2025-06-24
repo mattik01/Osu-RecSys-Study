@@ -3,3 +3,5 @@ data/processed/*
 sql_dump_import_and_modification/sql_dump/*
 data/processed.zip
 data/processed/*.zip
+DataAnalysis/matteo_recommender_folder/models/*
+DataAnalysis/matteo_recommender_folder/splits/* 

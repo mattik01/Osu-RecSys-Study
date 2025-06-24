@@ -11,7 +11,7 @@ Matteo
     - both for random and top users (Eva mentioned she really likes this)
     - use new enjoymet factor of scores (fallback playcount)
     - Be aware of skill improvement of users (use scores after skill stabilization date only, or some post-computation filter for difficulty (not too hard not too easy))
-=> performance baseline
+=> performance baseline 
 
 Matteo
 1. Constraints einbauen und erneut testen.
