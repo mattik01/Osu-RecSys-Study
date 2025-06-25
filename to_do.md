@@ -19,6 +19,15 @@ Matteo
 Sonja?
 1. Ein anderes Datenset finden, inklusive funktionierendem recommender system, constraints überlegen, einbauen und testen.
 
+- Ausschluss kürzlich gekaufter Produkte
+Nutzt das Feld reordered in order_products__prior.csv. Alle Artikel, bei denen reordered=1 in den letzten N Bestellungen vorkommt, werden für neue Empfehlungen ausgeschlossen.
+
+- Maximale Artikelzahl pro Abteilung
+Greift auf products.csv → department_id (plus departments.csv) zurück. Man kann z.B. höchstens zwei („max_genre_count“) Artikel pro Abteilung („Dairy“, „Produce“, „Bakery“ etc.) pro Empfehlung zulassen.
+
+- Aisle-Diversität
+Basierend auf products.csv → aisle_id (plus aisles.csv), erlaubt man pro Empfehlungsliste nur maximal M Artikel aus demselben Gang („Aisle“).
+
 
 Matteo (anfangen)
 3. Präsentation vorbereiten.
