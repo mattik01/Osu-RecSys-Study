@@ -1,0 +1,15 @@
+Ilyas Satik, Matteo Gläser, Sonja Dagn
+
+Points:
+
+Proposal (max. 8):  7
+
+Data analysis (max. 6):   6 
+(We have a lot of cool stuff here, unfortunately we were barely 
+able to show it due to time and the missed presentation)
+
+RecSys development (max. 16): 12
+passable pipeline, we also count all the data preparation and feature engineering (75% of what we did in effort)
+
+Evaluation and tuning (max. 10): 5
+lackluster. 

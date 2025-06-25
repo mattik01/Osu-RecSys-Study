@@ -3,6 +3,14 @@ data/processed/*
 sql_dump_import_and_modification/sql_dump/*
 data/processed.zip
 data/processed/*.zip
-DataAnalysis/matteo_recommender_folder/models/*
-DataAnalysis/matteo_recommender_folder/splits/* 
-DataAnalysis/second_dataset
+RecSys/pipeline/models/*
+RecSys/pipeline/splits/*.csv
+RecSys/pipeline/*.csv
+RecSys/second_dataset/*.csv
+RecSys/second_dataset/generated_splits_instacart/*.csv
+RecSys/second_dataset/models_instacart/*
+RecSys/second_folder
+
+DataAnalysis/second_dataset cany ou make it so that only csv files are ignored ?
+RecSys/pipeline/enjoyment.xlsx
+RecSys/pipeline/playcount_table.xlsx

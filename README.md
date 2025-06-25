@@ -1,203 +1,205 @@
-# A RecSys Study in Osu!
+## PREPOCESSING STEP THAT IS IMPORTANT TO REMEMBER:
+to make the huge amount of modding and beatmap combinations managable and avoid **item-explosion**. The following steps were taken.
+1. Parsed the Bitmasks into human readable format (a string set)
+2. Filtered out all rows where difficulty/map/pp altering Mods were used, except for the competetively viable (and most common) ones.
+3. Merged all "preference" mods if used, that change gameplay only a little into the remaining 4 main categories:  
+**NM**(No Mod),**DT**(Double Time), **HR**(Hard Rock), **DTHR**(Double Time + Hardrock)  
+    - **HD**(Hidden) was also collapsed, it changes diff and pp slightly, and is widely used. The max,pp score was kept in the collapsing. 
 
-## Introduction
-I enjoy playing rhythm games, and so do many others. My preferred one is also the most popular—the classic osu! game. Osu! is now approaching its 20-year anniversary. There are still around 2.5 million monthly active users and about 40 million registered accounts. By now, nearly 50,000 officially vetted (ranked) community-created beatmap sets exist, with at least a million more "loved" or "graveyard" sets.
-
-Considering the size and age of the community, it's surprising how much room for improvement there is in how players discover beatmaps. The official repository offers only basic filters, so discovery generally boils down to:
-
-
-- filtering by new or most played
-- looking up specific songs (and hoping someone mapped them)
-- users sharing and recommending in forums, multiplayer lobbies, or through playlists/collections
-
-### Special mentions:
-**Osu! Collector**  
-https://osucollector.com  
-A third-party service for sharing beatmap collections, often organized by skillset. Currently has 42,300 users and 12,600 shared collections.
-
-**Stream/Stamina Map Bot**  
-https://ost.sombrax79.org/commands  
-Powered by a large, community-submitted collection focused on stamina and stream maps. Its just special filters, not recommendations.
-
-**Osufy!**  
-https://osufy.lonke.ro  
-Finds beatmaps for songs in your Spotify playlists and works reasonably well—implicitly using Spotify’s recommendation system.  
-**Note:** Songs you like ≠ Beatmaps you like, so this doesn't fully solve the core issue.
-
-## How to make this better
-To me, there are two features that could immediately improve the process of finding beatmaps users love to play.
-
-### 1. Beatmap "Type" labeling
-Beatmaps are often perceived as belonging to certain types, based on one or more skillsets they demand from the player. While this is to some extent subjective, not officially attached to any map, and entirely community-driven, it’s a fundamental part of the osu! experience. Almost every player has preferences for certain types, and those preferences often evolve. Collections are usually organized around these types, tournaments select maps with them in mind, and many high-level players become specialists.
-
-According to this discussion:  
-https://www.reddit.com/r/osugame/comments/1kkj2zr/what_makes_you_enjoy_a_beatmap_how_well_does_osu/,  
-most users rank skillset enjoyment as the most—or one of the most—important factors in how much they enjoy a beatmap.
-
-So to me, it's an obvious conclusion that beatmaps should be tagged, giving users hints about what to expect before downloading and test-playing them. This was implemented in a within the new osu lazer client recently, as a community driven feature, but there should be an algorithmically driven solution.
-
-This issue has been raised multiple times in the past:  
-https://osu.ppy.sh/community/forums/topics/1928067?n=19  
-https://www.reddit.com/r/osugame/comments/1c3uo8s/map_tags/  
-https://www.reddit.com/r/osugame/comments/1dcz7ml/opinions_on_new_tagging_system/
-
-- The Spanish osu! wiki offers a very advanced and technical set of classification labels:  
-  https://osu1.roanh.dev/wiki/es/Beatmap/Beatmap_tags
-
-- Others prefer a simpler system aimed at casual players—e.g. a spider chart with fundamental skills like "aim", "stream", "tapping", "reading", "jump", and maybe "speed":  
-  https://osu.ppy.sh/community/forums/topics/1928067?n=21
-
-The most promising project I’m aware of that attempts automatic classification is **osu_oracle**. It’s extremely basic right now, but I’d like to test it myself when I get the chance:  
-https://github.com/token03/osu_oracle
-
-## 2. A RecSys (Recommender System) for Osu! Beatmaps
-Anyone familiar with recommender systems and their impact on users (when done well) won’t question why this should absolutely exist—officially as well. For those less familiar, here’s how it could help osu! specifically:
-
-- Find beatmaps you’ll actually enjoy, in a sea of options with poor filter support. No need to rely on chance forum posts or multiplayer lobbies—let the RecSys do it for you.
-- Help lesser-known mappers and maps get discovered. Popularity bias is a real issue in osu! A RecSys could surface niche maps that match your taste.
-- Avoid frequent “total misses”—no more rage-quitting maps that sound cool but when you try them, they are clearly built for DT farming, dense overlap patterns, or other things you dislike.
+4. treat each beatmap_id + Mod_string combination as a unique item and assign a new "item id": *mod_beatmap_id*
 
 
-#### Previous Work:
-
-**Tillerino**  
-A bot that can join in-game lobbies and recommend maps based on your top 10 plays.  
-https://github.com/Tillerino/Tillerinobot/wiki  
-*Using top plays as suggestions isn’t ideal—it heavily biases toward farm maps.*
-
-**Dynam1cBOT**  
-Analyzes your top plays to create a “skill fingerprint” using many features, then compares it to a large map database to recommend three maps: one easier, one matched, and one harder. It selects the skill-matched one 80% of the time.  
-*A hybrid recommendation approach, as far as I can tell.*
-
-**AlphaOsu!**  
-https://alphaosu.keytoix.vip/self/pp-recommend  
-Also based on top plays, fully focused on competitive players—recommending maps to maximize pp gain, not enjoyment.
-
-**Work by m1tm0**  
-Around the time I concluded, that there is serious room for improvement, a user named *m1tm0* gained attention by announcing his own RecSys project on Reddit. He discussed both plans and challenges:
-
-1. https://www.reddit.com/r/osugame/comments/1kkj2zr/what_makes_you_enjoy_a_beatmap_how_well_does_osu/ – Discussion on the difficulty of capturing “enjoyment” and a proposal for an enjoyment metric.  
-2. Same thread – Further elaboration on how ratings are constructed via explicit and implicit signals, what model was used at the time, and some example recommendations.  
-3. https://www.reddit.com/r/osugame/comments/1kqjags/osu_recsys_looking_for_alpha_testers/ – Model was switched to Bayesian Personalized Ranking for scalability; call for alpha testers.
-
-I’m in contact with the user, and a lot of groundwork is being laid through this project. It will be referenced in later sections. At this point, I can confirm that the first results are promising—already demonstrating the feasibility of this whole endeavor. It already takes domain-specific details like mod sensitivity into account and currently offers a Discord bot with many useful tuning options.
+---
 
 
-## Motivations for Contributing:
-- Contribute to the refinement of third-party recommendation tools, increase awareness and adoption in the community, and demonstrate interest in the feature, hopefully encouraging the osu! developers (or rhythm game developers in general) to adopt such systems.
-- Unlock a unique domain to run RecSys experiments and test research questions, not least as part of a project for my RecSys course at the University of Innsbruck.
+## SIZE INFO 
+
+| Metric          | Within Dump        | Export Tables             | Processed                                | Training       |
+|-----------------|--------------------|----------------------------|-------------------------------------------|----------------|
+| users_random    | 10,000             | 10,000                     | 10,000                                    | 3,991          |
+| scores_random   | 4,018,988          | 4,018,988                  | 2,611,808 (76%)                           | 509,895 |
+| beatmaps_random | 197,513            | 524,496 (=131,124×4)       | 257,979 (60,498 relevant ≥10 scores)      | 56,704  |
+| users_top       | 9,999              | 9,999                      | 9,999                                     | 9,643          |
+| scores_top      | 51,248,991         | 51,248,991                 | 37,305,629 (74%)                          | 6,292,778 |
+| beatmaps_top    | 197,513            | *(not exported)*           | 257,979 (254,833 relevant ≥10 scores)     | 233,878 |
 
 
-## Discussion of available data:
-We have two datasets: one with 10,000 random users and one for the top 10,000 users. They vary in the number of "interactions" (scores). The numbers below are based on the top player dataset, the random palyer has a little less.
-
-Due to the massive size, I collected and organized all data into a MySQL database. We’ll need to set up a robust system to extract only what’s needed.
-
-#### Items (Beatmaps) [~200,000 ranked beatmaps—should be most or all in existence]
-*Ranked only—vetted beatmaps. Loved, graveyard, etc., not included.*
-- `.osu` files in formats v1–v14, with metadata and geometric hit-object data [~6 GB]
-- Info file with 25 basic attributes
-- **Beatmap Set** table with Set Information [48,000, all ranked sets]  
-  (Beatmaps are always grouped in a set - same mp3, multiple difficulties)
-- Fail/exit mask for each map (split into 100 chunks: where do users quit/fail?) [~4 million lines—not all mod combinations]
-- Mod difficulty mask [~7 million lines]
-- Meta-attribute features for each **beatmap + mod** combo, e.g., *aim*, *strain*, *speed*,.. [~64 million lines]
-- MP3 files (not yet)
-
-#### Users [10,000]
-- User stats table with ~25 stats
-- Full profile (not pulled yet—doesn’t seem to add much)
-- Liked beatmaps (not pulled yet—valuable as explicit feedback)
-
-#### Interactions [at least 50,000,000 — exact count TBD]
-- Play count table for how often a user played each map [~75 million lines]
-- `scores_high` with basic performance stats [~43 million entries]
-- `scores` table with similar features [~34 million entries]  
-  (Likely partial import—stopped at ~65%. Need to check difference vs. `scores_high`)
-
-  *Basically for each Beatmap (+ Mod Combination that changes difficulty) the best score of each user seems to be included.*
+---
 
 
-## Discussion of (to me) reasonable approaches:
+- **Export Tables:**
+  - Only includes beatmaps with complete `diff_` attributes for all relevant mod combinations.
+  - `524,496 = 131,124 beatmaps × 4 mod combinations` (for Random).
 
-### 1. Collaborative Filtering  
-*Already exists in several approaches with varying degrees of success*
-
-#### Main Challenges:
-- **Beatmap/Mod interaction** – Mods alter both the experience and especially the difficulty of a map. Should each Map + Mod combination be treated as a separate item?
-- **Farm Bias** – Especially present in the top 10,000 user set, but generally common. Maps that give high pp for relatively low effort—so-called farm maps—are disproportionately overrepresented due to repeated plays and grinding.
-- **Popularity Bias** – Covered earlier, but worth repeating: very pronounced in osu!.
-- **Sequential Nature** – The data is inherently sequential and tied to player progression. Changes in skill and preference over time should ideally be captured.
-- **Enjoyment** – How do we interpret interactions? What defines an enjoyable recommendation? User mindsets vary from recreational to competitive. As discussed in  
-  https://www.reddit.com/r/osugame/comments/1kkj2zr/what_makes_you_enjoy_a_beatmap_how_well_does_osu/,  
-  enjoyment is complex, subjective and varies across skill levels. A good metric is needed. Something like *#Interactions = Enjoyment* will **not** suffice.
-- **Hard/Soft Constraints** – To be discussed in the following Research Questions section.
-
-### 2. A Content-Based Approach  
-*(I’m especially excited about this—maybe not best suited for this project)*
-
-#### Motivation:
-Beatmaps are extremely feature-rich items: they combine a music track, gameplay mechanics, competitive attributes, and (in theory) leaderboard context. It’s clear players can develop very specific tastes. True Content-based recommendation (Capturing Mapping or musical features, and not just the superficial attributes) has never been seriously attempted in this domain. Recommending Music alone is already complex enough.
-
-A proper hybrid system is likely out of reach for now, but an isolated content-based approach could be a first start. It’s also a great way to avoid the strong biases present in the interaction data.  
-*And someone has to make the first attemp, right?*
-
-#### Proposal:  
-**A “Beatmap Radio” (like Spotify’s)**  
-*Given a sample beatmap, return a set of similar ones. Some more similar in music, some more in gameplay.*
-
-To capture the complexity of beatmaps, a deep learning approach seems most viable. **Maybe something like this**:
-
-1. Scrape labels for each beatmap using osu_oracle, osu!lazer client tags, and user collections from osu!Collector.
-2. Create beatmap classes from these labels. *(Heavy preprocessing—this won’t be easy.)*
-3. Do the same for musical features.
-4. (Optional) Combine musical and gameplay features—if possible. *(Still hard to imagine, but maybe doable.)*
-5. Use contrastive learning to transform beatmaps into an embedding space, where proximity aligns with shared labels (for gameplay, music, or both).
-6. To find similar beatmaps: locate one in embedding space, return nearest neighbors.
-7. Evaluate using a test set—e.g., maps frequently appearing together in osu!Collector label-based collections should be close neighbors.
-
-
-## Discussion of possible Research Questions:
-Achieving solid recommendations in such a complex and new domain is a challenge in itself, but beyond that we want to anwers some research qeustions of course, and this field definietly opens up some interesting ones.
-
-Some ideas:
-
-### Applicable to CF-Approach
-
-#### 1. **Study on Implementing User-Specific Hard/Soft Recommendation Constraints**  
-Recommendations in osu! must fall within a narrow window of what's viable for a user.
-- Difficulty range must avoid both boredom and frustration. Static difficulty ratings (Star-Rating) might not be enough, as players often have vastly different skill levels across skillsets (see Beatmap Labeling).
-- Physical constraints matter: players have limits in approach rate (reading) and max hitrate (especially sustained), and others aswell. These limits improve gradually but can be pushed only by a marginal amount. From the Outside, I bet you would be surprised how hard these limits are for most players at any given time.
-
-**Outline:**
-1. Establish a recommendation baseline.
-2. Implement constraints in various ways (filtering, cost functions) across different models.
-3. **Do user-specific constraints based on domain knowledge improve recommendations?** If so, what's the best way to implement them?
-4. Explore transferability to other domains with similar constraint dynamics.
-
-#### 2. **Multidimensional Recommender System to Satisfy Players with Different Motivations**  
-*(Dont know much about these systems yet)*  
-Players are generally speaking on a spectrum from recreational to competitive. For this approach use the *random_users_dataset*. All top 10000 Players would be pretty competetive. 
-
-1. Start with a single-score baseline (e.g. some combination of: #interactions, pp, accuracy). It won’t fit all user types equally.
-2. Try using a multidimensional recommender (they learn user-specific weights for each dimension (I think)).
-3. Evaluate using a reward function, different from the training metrics:
-   - For farm-heavy maps: high pp achieved and fewer retries are good;
-   - likes are a strong signal always.
-   - For non-farm maps: more retries might signal enjoyment; maybe aim for 95% accuracy as an engaging soft target (from personal experience).
-4. Try transferring to another dataset where user motivations are fundamentally different aswell.
-
-## Applicable to CB-Approach  
-The approach itself is complex enough that just testing feasibility could be a valid research question. Beyond that, a few extensions:
-
-**These aren’t very generalizable yet, still working on it.**
-
-#### 1. **Does Contrastive Learning Capture the Multilabel Nature of Beatmaps?**  
-While a beatmap is often mainly one archetype, it’s more accurate to think of it as a distribution across multiple labels—especially with finer-grained types (see: https://osu1.roanh.dev/wiki/es/Beatmap/Beatmap_tags).
-
-#### 2. **Is the Embedding Space Meaningful Enough to Allow Transformations?**  
-Do dimensions in the embedding space align with how players perceive maps? Can we move in the space in useful ways—e.g., similar music but a jump map instead of a stream map (combined space), or “similar map but more technical patterns”?
+- **Processed Scores:**
+  - Filtering applied based on:
+    - Beatmap-mod relevant combinations.
+    - diff attribute completeness.
 
 
 
 
+## 🎯 Enjoyment Factor Calculation
+
+
+Each score is assigned an **enjoyment score** between 0 and 1 (most lie in the 0.1–0.5 range).  
+This factor is necessarily somewhat arbitrary, as its computed from implicit feedback only. It was designed from experience and checked to be meaningful and reasonably balanced through visualization and inspection of values (see `dataprocessor` and `analysis`).  
+
+!!! At different points ALL components are normailzed to ranges between 0 and 1, usually on a per user basis, to keep them comparable. 
+
+!!! At all relevant points, only data from the top/random dataset is seperated and used individually.
+
+```
+enjoyment = 
+0.2 * playcount_component +
+0.3 * favourite_component +
+0.2 * accuracy_component * (1 - farm_factor) +
+0.3 * pp_contribution_component * farm_factor
+```
+(if the map is farmy, value pp_contribution more; if not, value accuracy more)  
+  
+*All enjoyment scores are baseline- and variance-adjusted (zero mean, unit variance) **per user** afterwards.*
+
+---
+
+- **playcount_component(user, beatmap, mods)** =  `1 - exp(-user_playcount_on_beatmap / average_global_playcount)`  
+  → decaying scaling, saturation point around playcount average, normalized per-user to [0, 1]
+
+- **favourite_component(beatmapset)** =  `favourite_count / total_playcount`  
+  → global explicit positive feedback percentage for beatmapset
+
+- **accuracy_component(score)** =  `1 - (accuracy - 0.95)^2`  
+  → soft accuracy target of 95%
+
+- **pp_contribution_component(score, user)** = `score_pp / user_total_weighted_pp`  
+  → normalized per-user to [0, 1]
+
+- **farm_factor(beatmap)** = `0.2 * compactness + 0.8 * pp_contribution_global`
+
+  - **compactness** = `mean(pp) / max(pp)`  
+    → higher if all scores on the beatmap reach close to the maximum pp  
+
+  - **pp_contribution_global** =  `(sum of true_pp across all top scores using this beatmap) / total_playcount`  
+    → global true pp contribution by playcount  
+
+  - **true_pp(score)** =  `pp * 0.95^rank(score)`  
+    → official osu score contribution formula to the user's weighted pp list
+
+## 📁 `beatmaps.csv`
+
+
+
+Each row represents a unique combination of a **beatmap** and a **mod configuration**
+
+| Column | Description |
+|--------|-------------|
+| `mod_beatmap_id` | Unique hash ID for a specific beatmap and modification combination. | 
+| `beatmap_id` | Original beatmap ID in osu!. |
+| `mods_string` | Active modification(s) (See mod-info.txt) |
+| `beatmapset_id` | Group ID for related beatmaps (e.g., same song with different difficulties). |
+| `creator_user_id` | ID of the user who created the beatmap. |
+| `playcount` | How many times this beatmap was played globally. |
+| `passcount` | How many times players finished this beatmap. |
+| `set_favourite_count` | Number of users who favorited the beatmap set. |
+| `artist` | Artist of the song. |
+| `title` | Title of the song used |
+| `submit_date`, `approved_date` | When was the beatmap set published, and when was it approved for ranked |
+| `bpm` | Beats per minute of the song (tempo). |
+| `hit_length` | Duration of playable part (in seconds). |
+| `count_total`, `count_normal`, `count_slider`, `count_spinner` | Number of total objects and their breakdown. |
+| `diff_drain` | How quickly a player’s health drains during mistakes. Higher values make survival harder. |
+| `diff_size` | The size of the hit circles. Higher values make circles smaller and harder to hit. |
+| `diff_overall` | Strictness of the timing window to hit notes correctly. Higher values require more precision. |
+| `diff_approach` | Speed at which notes appear and fade. Higher values give less time to react. |
+| `diff_star_rating` | Star rating representing unified difficulty calculated from mapping data |
+| `aim`, `speed` | dynmically calculated from mapping data, represent something similar to distance of hit objects and hits/per second required |
+| `max_combo` | Maximum combo possible. |
+| `strain` | Overall difficulty strain of the beatmap, usually a weighted combination of aim and speed strains. rolling windows of aim and speed difficulty. (since these may vary over the map)
+| `slider_factor` | Ratio of sliders to total hit objects.
+| `speed_note_count` | Number of notes that appear in quick succession and are considered to contribute to speed difficulty. Typically counts note pairs where the time between them is below a threshold (e.g., 200 ms). |
+| `genre` | Genre of the song. |
+| `favourite_factor` | Favourite_count / total playcount of set, ratio of explicit positive feedback basically|
+| `relevant_random`, `relevant_top` | flags showing, if the beatmap has at least n(10) scores on the respective score_set  |
+| `random_farm_factor`, `top_farm_factor` | factors of how farmy a map is for the respective user_sets, see calculation on section above |
+
+
+---
+
+## 📁 `scores.csv`
+
+Each row represents the best score a user playing a specific beatmap with a specific modification achieved. 
+
+| Column | Description |
+|--------|-------------|
+| `score_id` | Unique row ID for this score (generated). |
+| `mod_beatmap_id` | Matches the `mod_beatmap_id` in `beatmaps.csv`. |
+| `beatmap_id` | The beatmap that was played. |
+| `mods_string` | Modification(s) used during play. |
+| `user_id` | ID of the player. |
+| `score` | Total score earned (game-specific metric). |
+| `pp` | Performance points — a normalized skill score, used for player rankings|
+| `accuracy` | weighted ratio of hit accuracy and misses |
+| `maxcombo` | Maximum combo achieved in this play. (consequtive hits withouth missing an object) |
+| `rank` | Letter rank awarded (e.g., `A`, `S`, `X`). according to certain accuracy/combo requirements, but does not really matter |
+| `date` | Date the play occurred. |
+| `playcount` | Total playcount of the user on this beatmap (ATTENTION NOT MOD SPECIFIC)|
+| `enjoyment` | complex constructed metric intended as "rating", see section above for details  |
+---
+
+## 📁 `users.csv`
+
+Each row represents an **osu! player profile**.
+
+| Column | Description |
+|--------|-------------|
+| `user_id` | Unique user ID. |
+| `username` | Player's username. |
+| `accuracy` | global accuracy (according to an faq this considers only hits to miss over all plays). |
+| `accuracy_new` | global Updated accuracy metric (this uses a weighted calculation depending on how accurate the hits are, maybe not over all plays? tends to be higher than the old one) |
+| `playcount` | Total number of completed beatmaps plays. |
+| `rank` | Global rank of the player . |
+| `fail_count` | Number of failed attempts. |
+| `exit_count` | Number of early exits or retries. (among other things potentially relevant to identify "farm players")|
+| `max_combo` | Highest combo achieved on any play. |
+| `country_acronym` | Country code (e.g., `US`, `JP`). |
+| `last_played` | Timestamp of the most recent play. |
+| `total_seconds_played` | Total time spent playing (in seconds). |
+| `total_weighted_pp` | Decaying weight pp sum on top 100 ranked scores, same formula as osu official: pp*0.95^(rank of play), this is the best metric for "user skill"|
+| `skill_stabilization_date` | estimate of when users reached the current skill level, (date when they got 10 of their 15 best plays) |
+
+
+total_weighted_pp,skill_stabilization_date
+
+### Nice to have, if possible obtain these when i have the time and a way without the osu api banning me:
+- max pp of a beatmap_mod id (not in osu api, possibly in third party)
+- liked beatmap- sets of users (seems impossible)
+- exist/failrate on beatmap 
+
+
+
+
+## MOD LOOKUP  (You can mostly ignore this):
+| Bit Flag | Code | Name        | Description |
+|----------|------|-------------|-------------|
+| 1        | NF   | No Fail     | You can’t fail—your HP won’t drop below 1. |
+| 2        | EZ   | Easy        | Halves overall difficulty: circles are larger, approach rate & HP drain are reduced. |
+| 4        | TD   | Touch Device | Optimized input for touchscreens (no penalty for misses, auto-hits spinners). |
+| 8        | HD   | Hidden      | Hit objects fade out shortly after appearing—tests your reading & timing reflexes. |
+| 16       | HR   | Hard Rock   | Increases overall difficulty: smaller circles, faster SR, higher HP drain, flipped playfield. |
+| 32       | SD   | Sudden Death | One miss (or 50/100 hit) ends the run immediately. |
+| 64       | DT   | Double Time | +50% speed and +1.12× AR & CS—makes the map play faster. |
+| 128      | RX   | Relax       | You don’t need to click—game auto-hits for you, but you still move the cursor. |
+| 256      | HT   | Half Time   | −25% speed and −1.12× AR & CS—slows the map way down. |
+| 512      | NC   | Nightcore   | All the effects of DT plus a higher-pitched soundtrack and special effects. (always appears together with DT) |
+| 1024     | FL   | Flashlight  | Only a small spotlight around the cursor is visible—everything else is dark. |
+| 2048     | AU   | Auto        | The game plays itself perfectly for you (100% accuracy, full combo). |
+| 4096     | SO   | Spun Out    | Spinners automatically finish themselves—no need to spin at all. |
+| 8192     | AP   | Auto Pilot  | Cursor movement is automated—only your clicks matter (still need to click in time). |
+| 16384    | PF   | Perfect     | Like SD but even stricter: you must hit every note with 300s—no 100s or 50s allowed. |
+| 32768    | K4   | Key4        | Forces a 4-key playfield (for mania mode). |
+| 65536    | K5   | Key5        | Forces a 5-key playfield (mania mode). *(mania mode is excluded from our data)* |
+| 131072   | K6   | Key6        | Forces a 6-key playfield (mania mode). |
+| 262144   | K7   | Key7        | Forces a 7-key playfield (mania mode). |
+| 524288   | K8   | Key8        | Forces an 8-key playfield (mania mode). |
+| 1048576  | FI   | Fade In     | Hit objects are completely invisible until their approach circle reaches them. |
+| 2097152  | RN   | Random      | Randomly shuffles the horizontal positions of hit objects (mania only). *(mania mode is excluded from our data)* |
