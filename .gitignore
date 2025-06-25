@@ -1,16 +1,15 @@
-data/export/*
-data/processed/*
-sql_dump_import_and_modification/sql_dump/*
+data/export/*csv
+data/processed/*csv
+sql_dump_import_and_modification/sql_dump
 data/processed.zip
 data/processed/*.zip
+RecSys/pipeline/splits/*
 RecSys/pipeline/models/*
-RecSys/pipeline/splits/*.csv
 RecSys/pipeline/*.csv
 RecSys/second_dataset/*.csv
 RecSys/second_dataset/generated_splits_instacart/*.csv
 RecSys/second_dataset/models_instacart/*
-RecSys/second_folder
 
-DataAnalysis/second_dataset cany ou make it so that only csv files are ignored ?
-RecSys/pipeline/enjoyment.xlsx
-RecSys/pipeline/playcount_table.xlsx
+
+DataAnalysis/second_dataset
+
