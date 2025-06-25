@@ -58,7 +58,7 @@ MODEL_CONFIGS = {
 }
 
 # Parallelism settings
-N_JOBS = 4 #-1 for all cores, but causes memory issues. with k fold 
+N_JOBS = 6 #-1 for all cores, but causes memory issues. with k fold 
 N_FOLDS = 3
 
 # ============================================
