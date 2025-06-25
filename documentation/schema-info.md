@@ -13,16 +13,16 @@ to make the huge amount of modding and beatmap combinations managable and avoid 
 
 
 ## SIZE INFO 
-### 📊 Combined Dataset Overview
 
-| Metric         | Within Dump       | Export Tables            | Processed                              |
-|----------------|-------------------|---------------------------|-----------------------------------------|
-| users_random   | 10,000            | 10,000                    | 10,000                                  |
-| scores_random  | 4,018,988         | 4,018,988                 | 2,611,808   (76%)                         |
-| beatmaps_random| 197,513           | 524,496 (=131,124×4)      | 257,979 (60,498 relevant ≥10 scores)   |
-| users_top      | 9,999             | 9,999                     | 9,999                                   |
-| scores_top     | 51,248,991        | 51,248,991                | 37,305,629 (74%)                        |
-| beatmaps_top   | 197,513           | *(not exported)*          | 257,979 (254,833 relevant ≥10 scores)  |
+| Metric          | Within Dump        | Export Tables             | Processed                                | Training       |
+|-----------------|--------------------|----------------------------|-------------------------------------------|----------------|
+| users_random    | 10,000             | 10,000                     | 10,000                                    | 3,991          |
+| scores_random   | 4,018,988          | 4,018,988                  | 2,611,808 (76%)                           | 509,895 |
+| beatmaps_random | 197,513            | 524,496 (=131,124×4)       | 257,979 (60,498 relevant ≥10 scores)      | 56,704  |
+| users_top       | 9,999              | 9,999                      | 9,999                                     | 9,643          |
+| scores_top      | 51,248,991         | 51,248,991                 | 37,305,629 (74%)                          | 6,292,778 |
+| beatmaps_top    | 197,513            | *(not exported)*           | 257,979 (254,833 relevant ≥10 scores)     | 233,878 |
+
 
 ---
 
